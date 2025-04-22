@@ -4,3 +4,4 @@ venv/
 app.log
 __pycache__/
 __pycache__/ws_client.cpython-312.pyc
+.coverage

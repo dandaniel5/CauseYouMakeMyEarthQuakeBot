@@ -8,8 +8,8 @@
 import asyncio
 import logging
 import os
-import string
-import uuid
+# import string
+# import uuid
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 
@@ -43,9 +43,9 @@ PAY_KEY = os.environ["PAY_KEY"]
 
 WEBHOOK_PATH = f"/bot/{TOKEN}"
 WEBHOOK_URL = BACK_URL + WEBHOOK_PATH
-PAY_BACK_URL = f"{BACK_URL}/p"
+# PAY_BACK_URL = f"{BACK_URL}/p"
 
-ALERT = f"Появилась запись, если вы уже зарегестроволись на сайте консульства то вам понадобиться Номер заявки и Защитный код, они есть у вас на почте.\nПрямая ссылка на запись для тех кто помнит\знает  Номер заявки и Защитный код -  https://gyumri.kdmid.ru/queue/OrderInfo.aspx\nЕсли вы их не пониматье то воспользуйтесь ссылкой которую вам выслало посольство напочту\nЕсли вы не регестровались на сайте то регеструйтесь - https://gyumri.kdmid.ru/"
+# ALERT = f"Появилась запись, если вы уже зарегестроволись на сайте консульства то вам понадобиться Номер заявки и Защитный код, они есть у вас на почте.\nПрямая ссылка на запись для тех кто помнит\знает  Номер заявки и Защитный код -  https://gyumri.kdmid.ru/queue/OrderInfo.aspx\nЕсли вы их не пониматье то воспользуйтесь ссылкой которую вам выслало посольство напочту\nЕсли вы не регестровались на сайте то регеструйтесь - https://gyumri.kdmid.ru/"
 # ALERT = "!!!!!!!!"
 # ALERT = "Important message about alerts!"
 
@@ -178,7 +178,7 @@ async def root():
 
 
 async def alert_user(tg_id, magnitude, renge, coords, flynn_region):
-    message = f"сейчас в на сросстоняии {renge} км от вас произошло землятрсяение силой {magnitude} баллов"
+    message = f"Currently, an earthquake with a magnitude of {magnitude} occurred at a distance of {renge} km from you"
     await alert(tg_id, message, coords, flynn_region)
 
 
@@ -206,21 +206,21 @@ async def alert(tg_id, message, coords=None, flynn_region=None):
             else:
                 logger.info(f"Failed to send message. Status code: {response.status}")
 
-async def alert_me(tg_id):
-    AL = "платеж получен, вы получите уведомление"
+# async def alert_me(tg_id):
+#     AL = "платеж получен, вы получите уведомление"
 
-    url = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
-    params = {
-        "chat_id": f"{tg_id}",
-        "text": f"{AL}"
-    }
+#     url = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
+#     params = {
+#         "chat_id": f"{tg_id}",
+#         "text": f"{AL}"
+#     }
 
-    async with aiohttp.ClientSession() as session:
-        async with session.get(url, params=params) as response:
-            if response.status == 200:
-                logger.info("Message sent successfully")
-            else:
-                logger.info(f"Failed to send message. Status code: {response.status}")
+#     async with aiohttp.ClientSession() as session:
+#         async with session.get(url, params=params) as response:
+#             if response.status == 200:
+#                 logger.info("Message sent successfully")
+#             else:
+#                 logger.info(f"Failed to send message. Status code: {response.status}")
 
 
 # async def alert_me(tg_id):
@@ -332,16 +332,16 @@ async def cmd_start(message: Message, state: FSMContext) -> None:
     tg_id = message.from_user.id
     await init_user(tg_id)
     await message.answer(
-        "добро поажловать, чтобы получить уведомления о землятрсяениях пришлите гелокауию. Мы сообщаем о землятрсяениях которые вы поучаствйте, уситывая растоние и мошьность \n \n Чтобы выключить уведомления нажмите нажмите /stop, чтобы возобновить или изменить просто отправте новые кориднаты")
+        "Welcome! To receive earthquake notifications, please send your geolocation. We will notify you about earthquakes you might experience, taking into account distance and magnitude \n \n To disable notifications, press /stop, to resume or change simply send new coordinates")
 
 
 @router.message(Command("stop"))
 async def cmd_stop(message: Message, state: FSMContext) -> None:
     tg_id = message.from_user.id
     if await disable_alerts(tg_id):
-        await message.answer("мы не будем присылать вам уведомления")
+        await message.answer("we will not send you notifications")
     else:
-        await message.answer("вы не подписаны на уведомления чтото пошло не так")
+        await message.answer("you are not subscribed to notifications something went wrong")
 
 
 @router.message(lambda message: message.location)
@@ -383,10 +383,10 @@ async def handle_location(message: Message):
         updated_user = await db.Users.find_one({"tg_id": tg_id})
         logger.info(f"Updated user data: {updated_user}")
         
-        await message.answer("Ваши координаты успешно обновлены, вы получите уведомления о землятрсяениях в этой зоне")
+        await message.answer("Your coordinates have been successfully updated, you will receive notifications about earthquakes in this area")
     except Exception as e:
         logger.error(f"Error updating user location: {str(e)}")
-        await message.answer("Произошла ошибка при сохранении координат. Пожалуйста, попробуйте позже.")
+        await message.answer("An error occurred while saving coordinates. Please try again later.")
 
 
 # @router.message(Command("stop"))
