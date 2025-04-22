@@ -125,6 +125,11 @@ logging.basicConfig(
     datefmt="%Y-%m-%d %H:%M:%S"  # Формат даты и времени
 )
 
+logging.getLogger("pymongo").setLevel(logging.WARNING)
+
+# Если используешь motor, тоже можно ограничить
+logging.getLogger("motor").setLevel(logging.WARNING)
+
 # Добавляем обработчик логов в консоль
 logger.addHandler(logging.StreamHandler())
 

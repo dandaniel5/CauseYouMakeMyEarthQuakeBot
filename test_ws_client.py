@@ -1,14 +1,18 @@
 import pytest
 import asyncio
 import json
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, patch, MagicMock
 from ws_client import earthquake_listener
 
 @pytest.mark.asyncio
 async def test_earthquake_listener_basic():
     # Создаем мок для websockets
     mock_websocket = AsyncMock()
-    mock_websocket.recv.return_value = json.dumps({
+    mock_websocket.__aenter__ = AsyncMock(return_value=mock_websocket)
+    mock_websocket.__aexit__ = AsyncMock()
+    
+    # Создаем тестовые данные
+    test_data = {
         "action": "create",
         "data": {
             "properties": {
@@ -19,7 +23,10 @@ async def test_earthquake_listener_basic():
                 "coordinates": [40.0, 45.0]
             }
         }
-    })
+    }
+    
+    # Настраиваем recv для возврата JSON строки
+    mock_websocket.recv = AsyncMock(return_value=json.dumps(test_data))
 
     # Создаем мок для callback функции
     mock_callback = AsyncMock()
@@ -46,10 +53,15 @@ async def test_earthquake_listener_basic():
 async def test_earthquake_listener_invalid_data():
     # Тест с некорректными данными
     mock_websocket = AsyncMock()
-    mock_websocket.recv.return_value = json.dumps({
+    mock_websocket.__aenter__ = AsyncMock(return_value=mock_websocket)
+    mock_websocket.__aexit__ = AsyncMock()
+    
+    test_data = {
         "action": "update",  # Неправильное действие
         "data": {}
-    })
+    }
+    
+    mock_websocket.recv = AsyncMock(return_value=json.dumps(test_data))
 
     mock_callback = AsyncMock()
 
@@ -70,7 +82,10 @@ async def test_earthquake_listener_invalid_data():
 async def test_earthquake_listener_error_handling():
     # Тест обработки ошибок
     mock_websocket = AsyncMock()
-    mock_websocket.recv.side_effect = Exception("Тестовая ошибка")
+    mock_websocket.__aenter__ = AsyncMock(return_value=mock_websocket)
+    mock_websocket.__aexit__ = AsyncMock()
+    
+    mock_websocket.recv = AsyncMock(side_effect=Exception("Тестовая ошибка"))
 
     mock_callback = AsyncMock()
 
@@ -91,8 +106,12 @@ async def test_earthquake_listener_error_handling():
 async def test_earthquake_listener_multiple_events():
     # Тест множественных событий
     mock_websocket = AsyncMock()
-    mock_websocket.recv.side_effect = [
-        json.dumps({
+    mock_websocket.__aenter__ = AsyncMock(return_value=mock_websocket)
+    mock_websocket.__aexit__ = AsyncMock()
+    
+    # Создаем список тестовых данных
+    test_data_list = [
+        {
             "action": "create",
             "data": {
                 "properties": {
@@ -103,8 +122,8 @@ async def test_earthquake_listener_multiple_events():
                     "coordinates": [40.0, 45.0]
                 }
             }
-        }),
-        json.dumps({
+        },
+        {
             "action": "create",
             "data": {
                 "properties": {
@@ -115,8 +134,14 @@ async def test_earthquake_listener_multiple_events():
                     "coordinates": [41.0, 46.0]
                 }
             }
-        })
+        }
     ]
+    
+    # Преобразуем данные в JSON строки
+    json_responses = [json.dumps(data) for data in test_data_list]
+    
+    # Настраиваем recv для возврата последовательности JSON строк
+    mock_websocket.recv = AsyncMock(side_effect=json_responses)
 
     mock_callback = AsyncMock()
 

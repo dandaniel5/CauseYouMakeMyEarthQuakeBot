@@ -23,7 +23,8 @@ async def earthquake_listener(callback: Callable[[float, list], None]):
                 flynn_region = props.get("flynn_region")
                 
                 print(f"🌍 Землетрясение M{magnitude} на {coords}")
-                asyncio.create_task(callback(magnitude, coords, flynn_region))
+                # asyncio.create_task(callback(magnitude, coords, flynn_region))
+                asyncio.create_task(callback(10, coords, flynn_region))
 
             except Exception as e:
                 print(f"⚠️ Ошибка: {e}")
